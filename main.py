@@ -4,12 +4,14 @@ import random
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from avl import *
+from rbt import *
 import numpy as np
 
-TAM_LISTA = 100
-NUM_REPETICOES = 10
+TAM_LISTA = 1000
+NUM_REPETICOES = 100
 INICIO_INTERVALO = 0
 FIM_INTERVALO = 20000
+
 
 def calc_media(results):
     averages = {}
@@ -32,26 +34,10 @@ def plota_grafico(averages):
 
     plt.show()
 
-def func(pct, allvals):
-    absolute = int(pct/100.*np.sum(allvals))
-    return "{:.1f}%\n({:d} wins)".format(pct, absolute)
-
-def plota_grafico_pizza(wins):
-    labels = wins.keys()
-    valores = list(wins.values())
-    ax = plt.subplots(figsize=(12, 9), subplot_kw=dict(aspect="equal"))[1]
-    wedges, texts, autotexts = ax.pie(valores, autopct=lambda pct: func(pct, valores), textprops=dict(color="w"))
-    ax.legend(wedges, labels, title="Algoritimos", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
-    plt.setp(autotexts, size=8, weight="bold")
-    plt.show()
-
 
 if __name__ == "__main__":
-    results = {'AVL': []}
-    result = {'AVL': 0}
-    wins = {'AVL': 0}
-    verifica_empate = set()
-    qtd_empates = 0
+    results = {'AVL': [], 'RBT': []}
+    result = {'AVL': 0, 'RBT': 0}
 
     for aux in range(NUM_REPETICOES):
         lista = cria_lista_sem_repeticao()
@@ -60,13 +46,16 @@ if __name__ == "__main__":
         for key in result.keys():
             if key == 'AVL':
                 inicio = time()
-                myTree = AVL_Tree()
+                avlTree = AVL_Tree()
                 root = None
                 for i in lista:
-                    root = myTree.insert(root, i)
+                    root = avlTree.insert(root, i)
 
-            elif key == 'Vermelho_e_preto':
+            elif key == 'RBT':
                 inicio = time()
+                rbt = Tree()
+                for i in lista:
+                    rb_insert(rbt, Node(i))
 
             fim = time()
             tempo = Decimal(fim - inicio)
@@ -74,31 +63,11 @@ if __name__ == "__main__":
             result[key] = tempo
             results[key].append(tempo)
 
-            verifica_empate.add(tempo)
-
-        if len(verifica_empate) != 3:
-            qtd_empates += 1
-
-        verifica_empate = set()
-
-        lis = list(result.items())
-        winner = min(lis,key=lambda item:item[1])
-
-        wins[winner[0]] += 1
-
-
-
-    print('Quantidade de empates: ', qtd_empates)
-
     averages = calc_media(results)
 
-    print('\n\t \t \tResultado em Wins:')
-    for key in wins.keys():
-        print(key + ': ' + str(wins[key]))
 
-    print('\n\t \t \tMedia de Tempo:')
+    print('\n\t \t \tMedia de Tempo(Inserções):')
     for key in averages.keys():
         print(key + ': ' + str(averages[key]))
 
-    plota_grafico_pizza(wins)
     plota_grafico(averages)
